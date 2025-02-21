@@ -1,57 +1,41 @@
 import requests
-import difflib
-import os
+from bs4 import BeautifulSoup
+import hashlib
 
-# === KONFIGURACJA ===
-URL = "https://ko.poznan.pl/rodzice_uczniowie/konkursy_olimpiady_ru/konkursy_przedmiotowe_ru/"  # Strona do monitorowania
-CACHE_FILE = "cache.txt"  # Plik do przechowywania poprzedniej wersji strony
-CHANGES_FILE = "changes.txt"  # Plik do zapisu wykrytych zmian
+URL = "https://ko.poznan.pl/rodzice_uczniowie/konkursy_olimpiady_ru/konkursy_przedmiotowe_ru/2025/01/wyniki-wojewodzkich-konkursow-przedmiotowych-stopien-wojewodzki" # <--- Zmień na stronę, którą chcesz monitorować
 
-def get_page_source():
-    """Pobiera kod źródłowy strony"""
+def get_page_hash():
+    """Pobiera kod źródłowy strony i zwraca jego hash"""
+    response = requests.get(URL)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    return hashlib.sha256(soup.prettify().encode()).hexdigest()
+
+def load_last_hash():
+    """Wczytuje poprzedni hash strony (jeśli istnieje)"""
     try:
-        response = requests.get(URL, timeout=10)
-        response.raise_for_status()
-        return response.text
-    except requests.RequestException as e:
-        print(f"❌ Błąd pobierania strony: {e}")
-        return None
+        with open("cache.txt", "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        return ""
 
-def load_previous_source():
-    """Wczytuje poprzednią wersję strony z pliku"""
-    if os.path.exists(CACHE_FILE):
-        with open(CACHE_FILE, "r", encoding="utf-8") as file:
-            return file.read()
-    return ""
+def save_new_hash(new_hash):
+    """Zapisuje nowy hash strony"""
+    with open("cache.txt", "w") as file:
+        file.write(new_hash)
 
-def save_current_source(source):
-    """Zapisuje aktualny kod strony do pliku"""
-    with open(CACHE_FILE, "w", encoding="utf-8") as file:
-        file.write(source)
+def log_changes():
+    """Zapisuje zmiany w pliku `changes.txt`"""
+    with open("changes.txt", "w") as file:
+        file.write(f"Strona {URL} zmieniła się!")
 
-def detect_changes(old, new):
-    """Porównuje starą i nową wersję strony"""
-    return '\n'.join(difflib.unified_diff(old.splitlines(), new.splitlines(), lineterm=""))
+# 1. Pobranie aktualnego kodu strony
+new_hash = get_page_hash()
 
-def main():
-    print("🔄 Sprawdzanie strony...")
-    new_source = get_page_source()
-    if not new_source:
-        return
+# 2. Wczytanie ostatniego zapisanego hasha
+old_hash = load_last_hash()
 
-    old_source = load_previous_source()
-    
-    if old_source and old_source != new_source:
-        diff = detect_changes(old_source, new_source)
-        print("🔴 Wykryto zmianę na stronie!\n", diff)
-
-        # Zapisujemy zmiany do pliku, który odczyta GitHub Actions
-        with open(CHANGES_FILE, "w", encoding="utf-8") as file:
-            file.write(diff)
-    else:
-        print("✅ Brak zmian.")
-
-    save_current_source(new_source)
-
-if __name__ == "__main__":
-    main()
+# 3. Sprawdzenie, czy strona się zmieniła
+if new_hash != old_hash:
+    log_changes()  # Zapisujemy informację o zmianach
+    save_new_hash(new_hash)  # Aktualizujemy zapisany kod strony
