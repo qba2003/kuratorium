@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import sys  # <--- NOWOŚĆ!
 
 URL = "https://ko.poznan.pl/rodzice_uczniowie/konkursy_olimpiady_ru/konkursy_przedmiotowe_ru/2025/01/wyniki-wojewodzkich-konkursow-przedmiotowych-stopien-wojewodzki/"
 
@@ -40,3 +41,6 @@ old_count = load_last_count()
 if new_count != old_count:
     log_changes(new_count)  # Zapisujemy zmiany
     save_new_count(new_count)  # Aktualizujemy zapisane dane
+    sys.exit(1)  # <--- NOWOŚĆ! Zwraca 1, jeśli były zmiany
+else:
+    sys.exit(0)  # <--- Jeśli nie było zmian, kończy skrypt z kodem 0
