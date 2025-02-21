@@ -3,7 +3,7 @@ import difflib
 import os
 
 # === KONFIGURACJA ===
-URL = "https://ko.poznan.pl/rodzice_uczniowie/konkursy_olimpiady_ru/konkursy_przedmiotowe_ru/2025/01/wyniki-wojewodzkich-konkursow-przedmiotowych-stopien-wojewodzki/"  # Strona do monitorowania
+URL = "https://ko.poznan.pl/rodzice_uczniowie/konkursy_olimpiady_ru/konkursy_przedmiotowe_ru/"  # Strona do monitorowania
 CACHE_FILE = "cache.txt"  # Plik do przechowywania poprzedniej wersji strony
 CHANGES_FILE = "changes.txt"  # Plik do zapisu wykrytych zmian
 
