@@ -2,7 +2,7 @@ name: Monitor PDF Count
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Sprawdza stronę co minutę
+    - cron: '*/3 * * * *'  # Sprawdza stronę co minutę
   workflow_dispatch:  # Możliwość ręcznego uruchomienia
 
 permissions:
