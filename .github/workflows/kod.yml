@@ -2,39 +2,36 @@ name: Monitor Website Changes
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Odpala co minutę
-  workflow_dispatch:  # Pozwala uruchomić ręcznie
+    - cron: '*/1 * * * *'  # Uruchamianie co minutę
+  workflow_dispatch:  # Możliwość ręcznego uruchomienia
+
+permissions:
+  contents: write  # Pozwala na zapisywanie zmian w repozytorium
 
 jobs:
-  check_site:
+  check_website:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pobierz repozytorium
-        uses: actions/checkout@v3
+      - name: Sprawdzenie kodu repozytorium
+        uses: actions/checkout@v3  # Pobiera najnowsze pliki z repo
 
-      - name: Instalacja Pythona
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.x'
-
-      - name: Instalacja zależności
-        run: pip install requests
+      - name: Instalacja zależności Pythona
+        run: pip install requests beautifulsoup4
 
       - name: Uruchomienie skryptu monitorującego
         run: python kod.py
 
-      - name: Sprawdzenie, czy wykryto zmiany
-        id: check_changes
+      - name: Commit zmian jeśli wykryto różnice
+        if: success()
         run: |
-          if [ -s changes.txt ]; then
-            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
-          else
-            echo "CHANGES_DETECTED=false" >> $GITHUB_ENV
-          fi
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add changes.txt cache.txt
+          git diff --cached --exit-code || (git commit -m "📌 Wykryto zmianę na stronie!" && git push)
 
-      - name: Wysłanie e-maila w razie zmian
-        if: env.CHANGES_DETECTED == 'true'
+      - name: Wysłanie e-maila, jeśli wykryto zmianę
+        if: success()
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -42,6 +39,6 @@ jobs:
           username: ${{ secrets.EMAIL_SENDER }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "🔴 Wykryto zmianę na stronie!"
-          body: "Zmieniono stronę:"
+          body: "Strona zmieniła się! Oto różnice:\n\n$(cat changes.txt)"
           to: ${{ secrets.EMAIL_RECEIVER }}
           from: "Monitor Strony <${{ secrets.EMAIL_SENDER }}>"
