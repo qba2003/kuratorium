@@ -523,7 +523,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="slider-wrapper">
          <div class="ribbon">
          </div>
-         <div class="nivoSlider" id="nivoslider-qgNxD-8018">
+         <div class="nivoSlider" id="nivoslider-KxCec-8018">
           <a href="https://ko.poznan.pl/aktualnosci_kurator/2025/01/wielkopolski-okragly-stol-uczniowski-27-lutego-2025/" target="_blank">
            <img alt="Wielkopolski Okrągły Stół Uczniowski – 27 lutego 2025" src="https://ko.poznan.pl/wp-content/uploads/2017/09/okragly-stol-uczniowski.jpg"/>
           </a>
@@ -558,7 +558,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
         <script type="text/javascript">
          window.onload = function(){
-    jQuery("#nivoslider-qgNxD-8018").nivoSlider({
+    jQuery("#nivoslider-KxCec-8018").nivoSlider({
         effect:"fade",
         slices:12,
         boxCols:8,
