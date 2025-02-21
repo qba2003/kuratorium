@@ -22,7 +22,7 @@ jobs:
         run: pip install requests
 
       - name: Uruchomienie skryptu monitorującego
-        run: python monitor.py
+        run: python kod.py
 
       - name: Sprawdzenie, czy wykryto zmiany
         id: check_changes
