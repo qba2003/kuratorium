@@ -1,0 +1,47 @@
+name: Monitor Website Changes
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'  # Odpala co minutę
+  workflow_dispatch:  # Pozwala uruchomić ręcznie
+
+jobs:
+  check_site:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pobierz repozytorium
+        uses: actions/checkout@v3
+
+      - name: Instalacja Pythona
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
+
+      - name: Instalacja zależności
+        run: pip install requests
+
+      - name: Uruchomienie skryptu monitorującego
+        run: python monitor.py
+
+      - name: Sprawdzenie, czy wykryto zmiany
+        id: check_changes
+        run: |
+          if [ -s changes.txt ]; then
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+          else
+            echo "CHANGES_DETECTED=false" >> $GITHUB_ENV
+          fi
+
+      - name: Wysłanie e-maila w razie zmian
+        if: env.CHANGES_DETECTED == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_SENDER }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🔴 Wykryto zmianę na stronie!"
+          body: "Zmieniono stronę:"
+          to: ${{ secrets.EMAIL_RECEIVER }}
+          from: "Monitor Strony <${{ secrets.EMAIL_SENDER }}>"
