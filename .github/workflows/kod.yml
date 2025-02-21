@@ -20,18 +20,19 @@ jobs:
         run: pip install requests beautifulsoup4
 
       - name: Uruchomienie skryptu sprawdzającego PDF-y
+        id: check  # <--- Dodajemy ID kroku
         run: python kod.py
 
       - name: Commit zmian jeśli wykryto różnice
-        if: success()
+        if: failure()  # <--- Teraz commitujemy TYLKO jeśli `kod.py` zwróci 1
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add changes.txt cache.txt
-          git diff --cached --exit-code || (git commit -m "📌 Wykryto zmianę w liczbie 'pdf'!" && git push)
+          git commit -m "📌 Wykryto zmianę w liczbie 'pdf'!" && git push
 
       - name: Wysłanie e-maila, jeśli wykryto zmianę
-        if: success()
+        if: failure()  # <--- E-mail tylko jeśli `kod.py` zwrócił 1
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
