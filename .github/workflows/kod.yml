@@ -1,25 +1,25 @@
-name: Monitor Website Changes
+name: Monitor PDF Count
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Uruchamianie co minutę
+    - cron: '*/1 * * * *'  # Sprawdza stronę co minutę
   workflow_dispatch:  # Możliwość ręcznego uruchomienia
 
 permissions:
-  contents: write  # Pozwala na zapisywanie zmian w repozytorium
+  contents: write  # Pozwala na commitowanie zmian
 
 jobs:
   check_website:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Sprawdzenie kodu repozytorium
-        uses: actions/checkout@v3  # Pobiera najnowsze pliki z repo
+      - name: Pobranie repozytorium
+        uses: actions/checkout@v3  # Pobiera pliki repozytorium
 
       - name: Instalacja zależności Pythona
         run: pip install requests beautifulsoup4
 
-      - name: Uruchomienie skryptu monitorującego
+      - name: Uruchomienie skryptu sprawdzającego PDF-y
         run: python kod.py
 
       - name: Commit zmian jeśli wykryto różnice
@@ -28,7 +28,7 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
           git add changes.txt cache.txt
-          git diff --cached --exit-code || (git commit -m "📌 Wykryto zmianę na stronie!" && git push)
+          git diff --cached --exit-code || (git commit -m "📌 Wykryto zmianę w liczbie 'pdf'!" && git push)
 
       - name: Wysłanie e-maila, jeśli wykryto zmianę
         if: success()
@@ -38,7 +38,7 @@ jobs:
           server_port: 587
           username: ${{ secrets.EMAIL_SENDER }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "🔴 Wykryto zmianę na stronie!"
-          body: "Strona zmieniła się! Oto różnice:\n\n$(cat changes.txt)"
+          subject: "🔴 Wykryto zmianę w PDF-ach!"
+          body: "Liczba 'pdf' na stronie się zmieniła!\n\n$(cat changes.txt)"
           to: ${{ secrets.EMAIL_RECEIVER }}
           from: "Monitor Strony <${{ secrets.EMAIL_SENDER }}>"
